@@ -1,95 +1,142 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import { useState } from 'react';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  IconButton,
+} from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [url, setUrl] = useState('');
+  const [alias, setAlias] = useState('');
+  const [message, setMessage] = useState('');
+  const [shortUrl, setShortUrl] = useState('');
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const urlPattern = /^https:\/\/www\./;
+    if (!urlPattern.test(url)) {
+        setMessage('Please enter a valid URL');
+        return;
+    }
+
+    const response = await fetch('/api/createAlias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alias, url }),
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+        const baseUrl = window.location.origin;
+        const generatedUrl = `${baseUrl}/${alias}`;
+        setShortUrl(generatedUrl);
+        setMessage('Short URL created!');
+    } else {
+        setMessage(result.error || 'Error creating alias');
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(shortUrl).then(() => {
+      setMessage('Copied to clipboard!');
+    });
+  };
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        bgcolor: '#f5f5f5',
+        p: 3,
+      }}
+    >
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          maxWidth: 500,
+          width: '100%',
+          textAlign: 'center',
+        }}
+      >
+        <Typography variant="h4" gutterBottom>
+          URL Shortener
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              label="Enter URL"
+              variant="outlined"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              required
             />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
+          </Box>
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              label="Enter Alias"
+              variant="outlined"
+              value={alias}
+              onChange={(e) => setAlias(e.target.value)}
+              required
+            />
+          </Box>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            type="submit"
+            sx={{ mb: 2 }}
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            Create Alias
+          </Button>
+        </form>
+        {message && (
+          <Typography
+            variant="body1"
+            color={message === 'Copied to clipboard!' ? 'secondary' : 'primary'}
+            sx={{ mb: 2 }}
+          >
+            {message}
+          </Typography>
+        )}
+        {shortUrl && (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mt: 2,
+            }}
+          >
+            <Typography variant="body1" sx={{ mr: 1 }}>
+              {shortUrl}
+            </Typography>
+            <IconButton
+              color="primary"
+              aria-label="copy to clipboard"
+              onClick={copyToClipboard}
+            >
+              <ContentCopyIcon />
+            </IconButton>
+          </Box>
+        )}
+      </Paper>
+    </Box>
   );
 }
+
+
