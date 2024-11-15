@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
         const newEntry = { alias, url };
         await collection.insertOne(newEntry);
         return NextResponse.json({ message: 'Alias created', alias }, { status: 201 });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
