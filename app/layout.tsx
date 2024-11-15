@@ -1,7 +1,12 @@
 'use client';
 
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import React from 'react';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
+import { createTheme } from '@mui/material/styles';
+
+const clientSideEmotionCache = createCache({ key: 'css', prepend: true });
 
 const theme = createTheme({
   palette: {
@@ -20,14 +25,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
+    <CacheProvider value={clientSideEmotionCache}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {children}
+      </ThemeProvider>
+    </CacheProvider>
   );
 }
+
 

@@ -19,6 +19,8 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted');
+
 
     const urlPattern = /^https:\/\/www\./;
     if (!urlPattern.test(url)) {
