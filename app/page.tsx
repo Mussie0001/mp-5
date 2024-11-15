@@ -19,7 +19,7 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-      console.log('Form submitted');
+    console.log('submitting', alias, url);
 
     const urlPattern = /^https:\/\/www\./;
     if (!urlPattern.test(url)) {
@@ -139,5 +139,4 @@ export default function Home() {
     </Box>
   );
 }
-
 
